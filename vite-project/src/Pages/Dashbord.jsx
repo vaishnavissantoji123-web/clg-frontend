@@ -1,145 +1,150 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { NavLink, useNavigate } from "react-router-dom";
-import {
-  FaHome,
-  FaUserGraduate,
-  FaBook,
-  FaCog,
-  FaSignOutAlt,
-} from "react-icons/fa";
 
-function Dashboard() {
-  const [data, setData] = useState({});
+export default function Dashboard() {
   const navigate = useNavigate();
 
-  // 🔥 Fetch dashboard data
-  const fetchData = async () => {
-    const res = await axios.get("http://localhost:5000/api/dashboard");
-    setData(res.data);
+  const ADMIN_PASSWORD = "1234";
+
+  const openAdminPage = (path) => {
+    const pass = prompt("Enter Admin Password:");
+
+    if (pass === ADMIN_PASSWORD) {
+      navigate(path);
+    } else {
+      alert("❌ Wrong Password");
+    }
   };
 
+  // 🔥 STATE FOR LIVE DATA
+  const [stats, setStats] = useState({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  });
+
+  // 🔥 FETCH DATA FROM BACKEND
   useEffect(() => {
-    fetchData();
+    axios
+      .get("http://localhost:5000/dashboard")
+      .then((res) => {
+        setStats(res.data);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  // 🔥 CARDS WITH LIVE DATA
+  const cards = [
+    { title: "Total Students", value: stats.total, color: "#2563eb" },
+    { title: "Approved", value: stats.approved, color: "#16a34a" },
+    { title: "Pending", value: stats.pending, color: "#f59e0b" },
+    { title: "Rejected", value: stats.rejected, color: "#ef4444" },
+  ];
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* SIDEBAR */}
-      <div className="w-64 bg-gradient-to-b from-indigo-700 to-purple-700 text-white flex flex-col justify-between">
-        <div>
-          <div className="p-5 text-xl font-bold">🎓 Admin Panel</div>
+    <div style={{ padding: "20px", background: "#f8fafc", minHeight: "100vh" }}>
+      {/* HEADER */}
+      <div style={styles.header}>
+        <h2>📊 College Dashboard</h2>
 
-          <ul className="p-4 space-y-3">
-            <NavLink
-              to="/dashboard"
-              className="p-2 bg-indigo-600 rounded flex gap-2"
-            >
-              <FaHome /> Dashboard
-            </NavLink>
-
-            <NavLink
-              to="/students"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaUserGraduate /> Students
-            </NavLink>
-
-            <NavLink
-              to="/courses"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaBook /> Courses
-            </NavLink>
-
-            <NavLink
-              to="/settings"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaCog /> Settings
-            </NavLink>
-          </ul>
-        </div>
-
-        <div className="p-4">
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 p-2 rounded"
-          >
-            <FaSignOutAlt /> Logout
-          </button>
+        {/* ADMIN BUTTON */}
+        <div
+          style={styles.admin}
+          onClick={() => openAdminPage("/admin-profile")}
+        >
+          👤 Admin
         </div>
       </div>
 
-      {/* MAIN */}
-      <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-
-        {/* 📊 CARDS */}
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Total Students</h3>
-            <p className="text-3xl">{data.totalStudents || 0}</p>
+      {/* CARDS */}
+      <div style={styles.grid}>
+        {cards.map((c, i) => (
+          <div
+            key={i}
+            style={{
+              ...styles.card,
+              borderTop: `4px solid ${c.color}`,
+            }}
+          >
+            <h4>{c.title}</h4>
+            <h1>{c.value}</h1>
           </div>
+        ))}
+      </div>
 
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Total Courses</h3>
-            <p className="text-3xl">{data.totalCourses || 0}</p>
-          </div>
+      {/* NOTICE PANEL */}
+      <div style={styles.panel}>
+        <h3>📢 Notices</h3>
+        <p>• Admission open for 2026 batch</p>
+        <p>• Exam timetable released</p>
+        <p>• Fee payment last date extended</p>
+      </div>
 
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Pending</h3>
-            <p className="text-3xl text-yellow-500">{data.pending || 0}</p>
-          </div>
+      {/* FACILITIES */}
+      <div style={styles.panel}>
+        <h3>🏫 Facilities</h3>
 
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Approved</h3>
-            <p className="text-3xl text-green-500">{data.approved || 0}</p>
-          </div>
-        </div>
-
-        {/* 📋 RECENT STUDENTS */}
-        <div className="bg-white p-5 rounded shadow">
-          <h2 className="text-xl mb-4">Recent Students</h2>
-
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th>Name</th>
-                <th>Course</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.recentStudents?.map((s) => (
-                <tr key={s._id} className="border-b">
-                  <td>{s.name}</td>
-                  <td>{s.course}</td>
-                  <td
-                    className={
-                      s.status === "approved"
-                        ? "text-green-500"
-                        : s.status === "rejected"
-                          ? "text-red-500"
-                          : "text-yellow-500"
-                    }
-                  >
-                    {s.status}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div style={styles.grid}>
+          <div style={styles.item}>📶 Wi-Fi Campus</div>
+          <div style={styles.item}>📚 Library & Digital Library</div>
+          <div style={styles.item}>🏠 Hostel Facility</div>
+          <div style={styles.item}>🏏 Sports Ground</div>
+          <div style={styles.item}>💻 Computer Labs</div>
+          <div style={styles.item}>🏛️ Govt Scholarship</div>
+          <div style={styles.item}>🎯 Job Opportunities</div>
         </div>
       </div>
     </div>
   );
 }
 
-export default Dashboard;
+/* STYLES */
+const styles = {
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
+
+  admin: {
+    background: "#0f172a",
+    color: "white",
+    padding: "8px 14px",
+    borderRadius: "6px",
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
+    marginTop: "20px",
+  },
+
+  card: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    textAlign: "center",
+  },
+
+  panel: {
+    marginTop: "30px",
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  },
+
+  item: {
+    background: "#f1f5f9",
+    padding: "10px",
+    borderRadius: "8px",
+    textAlign: "center",
+  },
+};
