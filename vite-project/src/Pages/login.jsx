@@ -1,95 +1,56 @@
-import { useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function Login() {
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  // ✅ state for inputs
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+  // ✅ correct login function
+  const handleLogin = () => {
+    const savedUser = localStorage.getItem("username");
+    const savedPass = localStorage.getItem("password");
 
-      // Save token
-      localStorage.setItem("token", res.data.token);
-
-      alert("Login Successful ✅");
-
-      // Redirect to dashboard
-      navigate("/dashboard");
-    } catch (error) {
-      alert(error.response?.data?.message || "Login Failed ❌");
+    if (user === savedUser && pass === savedPass) {
+      localStorage.setItem("isLoggedIn", "true");
+      navigate("/");
+    } else {
+      alert("Invalid credentials ❌");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <h2 style={{ textAlign: "center" }}>Login</h2>
+    <div style={{ textAlign: "center", marginTop: "100px" }}>
+      <h2>Login Page</h2>
 
-        <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-          required
-        />
+      {/* USERNAME */}
+      <input
+        placeholder="Username"
+        value={user}
+        onChange={(e) => setUser(e.target.value)}
+      />
+      <br />
+      <br />
 
-        <input
-          type="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-          required
-        />
+      {/* PASSWORD */}
+      <input
+        type="password"
+        placeholder="Password"
+        value={pass}
+        onChange={(e) => setPass(e.target.value)}
+      />
+      <br />
+      <br />
 
-        <button type="submit" style={styles.button}>
-          Login
-        </button>
-      </form>
+      {/* LOGIN BUTTON */}
+      <button onClick={handleLogin}>Login</button>
+      <br />
+      <br />
+
+      {/* GO TO REGISTER */}
+      <button onClick={() => navigate("/register")}>Create Account</button>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f2f2f2",
-  },
-  form: {
-    width: "300px",
-    padding: "20px",
-    background: "white",
-    borderRadius: "10px",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-  },
-  input: {
-    width: "100%",
-    padding: "10px",
-    margin: "10px 0",
-    border: "1px solid #ccc",
-    borderRadius: "5px",
-  },
-  button: {
-    width: "100%",
-    padding: "10px",
-    background: "blue",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-};
-
-export default Login;

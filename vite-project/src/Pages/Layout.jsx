@@ -1,20 +1,26 @@
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg";
 
 export default function Layout() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
   return (
     <div style={styles.container}>
       {/* SIDEBAR */}
       <div style={styles.sidebar}>
-        {/* LOGO SECTION (TOP) */}
+        {/* LOGO */}
         <div style={styles.logoBox}>
           <img src={logo} alt="logo" style={styles.logo} />
-
-          <h3 style={styles.title}>Government Polytechnic Holealur</h3>
+          <h3 style={styles.title}>Government Polytechnic Holealur 582203</h3>
         </div>
 
-        {/* NAV LINKS */}
+        {/* LINKS */}
         <NavLink to="/" style={styles.link}>
           🏠 Dashboard
         </NavLink>
@@ -24,9 +30,14 @@ export default function Layout() {
         <NavLink to="/admission" style={styles.link}>
           📝 Admission
         </NavLink>
+
+        {/* ✅ LOGOUT BUTTON */}
+        <button onClick={handleLogout} style={styles.logout}>
+          🚪 Logout
+        </button>
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <div style={styles.main}>
         <Outlet />
       </div>
@@ -34,7 +45,7 @@ export default function Layout() {
   );
 }
 
-/* STYLES */
+/* ✅ STYLES */
 const styles = {
   container: {
     display: "flex",
@@ -43,10 +54,12 @@ const styles = {
 
   sidebar: {
     width: "260px",
-    height: "120vh",
+    height: "120vh", // ✅ fixed height
     background: "#0f172a",
     color: "white",
     padding: "20px",
+    display: "flex", // ✅ IMPORTANT
+    flexDirection: "column", // ✅ IMPORTANT
   },
 
   logoBox: {
@@ -65,7 +78,7 @@ const styles = {
   },
 
   title: {
-    fontSize: "17px",
+    fontSize: "16px",
     marginTop: "10px",
     color: "#38bdf8",
     fontWeight: "bold",
@@ -82,10 +95,21 @@ const styles = {
     background: "#1e293b",
   },
 
+  logout: {
+    marginTop: "auto", // ✅ pushes button to bottom
+    padding: "12px",
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    borderRadius: "6px",
+    width: "100%",
+  },
+
   main: {
     flex: 1,
     background: "#f1f5f9",
-    minHeight: "120vh",
+    minHeight: "100vh",
     padding: "20px",
   },
 };
