@@ -5,7 +5,6 @@ export default function AdminProfile() {
   const [students, setStudents] = useState([]);
   const [tab, setTab] = useState("students");
 
-  // 🔥 ADMIN STATE
   const [adminData, setAdminData] = useState({
     name: "",
     password: "",
@@ -22,7 +21,6 @@ export default function AdminProfile() {
   useEffect(() => {
     fetchStudents();
 
-    // 🔥 FETCH ADMIN DATA
     axios.get("http://localhost:5000/admin").then((res) => {
       setAdminData(res.data);
     });
@@ -44,7 +42,7 @@ export default function AdminProfile() {
     axios.delete(`http://localhost:5000/students/${id}`).then(fetchStudents);
   };
 
-  // ================= ADMIN SETTINGS =================
+  // ================= ADMIN =================
   const handleChange = (e) => {
     setAdminData({ ...adminData, [e.target.name]: e.target.value });
   };
@@ -57,10 +55,10 @@ export default function AdminProfile() {
   };
 
   return (
-    <div style={{ padding: "20px", background: "#f1f5f9", minHeight: "100vh" }}>
-      <h2>👤 Admin Panel</h2>
+    <div style={styles.container}>
+      <h2 style={{ marginBottom: "10px" }}>👤 Admin Panel</h2>
 
-      {/* TABS */}
+      {/* Tabs */}
       <div style={styles.tabs}>
         <button onClick={() => setTab("students")} style={styles.btn}>
           🎓 Students
@@ -77,36 +75,67 @@ export default function AdminProfile() {
 
           <table style={styles.table}>
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Course</th>
-                <th>Status</th>
-                <th>Actions</th>
+              <tr style={styles.thead}>
+                <th style={styles.th}>Name</th>
+                <th style={styles.th}>Email</th>
+                <th style={styles.th}>Course</th>
+                <th style={styles.th}>Status</th>
+                <th style={styles.th}>Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {students.map((s) => (
-                <tr key={s._id}>
-                  <td>{s.name}</td>
-                  <td>{s.email}</td>
-                  <td>{s.course}</td>
-                  <td>{s.status}</td>
+                <tr key={s._id} style={styles.tr}>
+                  <td style={styles.td}>{s.name}</td>
+                  <td style={styles.td}>{s.email || "-"}</td>
+                  <td style={styles.td}>{s.course}</td>
 
-                  <td>
-                    <button
-                      onClick={() => approve(s._id)}
-                      style={styles.approve}
+                  {/* Status */}
+                  <td style={styles.td}>
+                    <span
+                      style={{
+                        ...styles.status,
+                        background:
+                          s.status === "Approved"
+                            ? "#dcfce7"
+                            : s.status === "Rejected"
+                              ? "#fee2e2"
+                              : "#fef9c3",
+                        color:
+                          s.status === "Approved"
+                            ? "green"
+                            : s.status === "Rejected"
+                              ? "red"
+                              : "orange",
+                      }}
                     >
-                      ✔
-                    </button>
-                    <button onClick={() => reject(s._id)} style={styles.reject}>
-                      ✖
-                    </button>
-                    <button onClick={() => remove(s._id)} style={styles.delete}>
-                      🗑
-                    </button>
+                      {s.status}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td style={styles.td}>
+                    <div style={styles.actionBox}>
+                      <button
+                        onClick={() => approve(s._id)}
+                        style={styles.approve}
+                      >
+                        ✔
+                      </button>
+                      <button
+                        onClick={() => reject(s._id)}
+                        style={styles.reject}
+                      >
+                        ✖
+                      </button>
+                      <button
+                        onClick={() => remove(s._id)}
+                        style={styles.delete}
+                      >
+                        🗑
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -148,8 +177,14 @@ export default function AdminProfile() {
 /* ================= STYLES ================= */
 
 const styles = {
+  container: {
+    padding: "20px",
+    background: "#f1f5f9",
+    minHeight: "100vh",
+  },
+
   tabs: {
-    marginTop: "20px",
+    marginTop: "15px",
     display: "flex",
     gap: "10px",
   },
@@ -168,12 +203,44 @@ const styles = {
     background: "white",
     padding: "20px",
     borderRadius: "10px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   },
 
   table: {
     width: "100%",
     marginTop: "15px",
     borderCollapse: "collapse",
+  },
+
+  thead: {
+    background: "#f1f5f9",
+  },
+
+  th: {
+    padding: "12px",
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
+  td: {
+    padding: "12px",
+    textAlign: "center",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  tr: {},
+
+  status: {
+    padding: "5px 12px",
+    borderRadius: "20px",
+    fontSize: "12px",
+    fontWeight: "bold",
+  },
+
+  actionBox: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "8px",
   },
 
   input: {
@@ -188,8 +255,8 @@ const styles = {
     background: "green",
     color: "white",
     border: "none",
-    padding: "5px 8px",
-    marginRight: "5px",
+    padding: "6px 10px",
+    borderRadius: "4px",
     cursor: "pointer",
   },
 
@@ -197,8 +264,8 @@ const styles = {
     background: "orange",
     color: "white",
     border: "none",
-    padding: "5px 8px",
-    marginRight: "5px",
+    padding: "6px 10px",
+    borderRadius: "4px",
     cursor: "pointer",
   },
 
@@ -206,7 +273,8 @@ const styles = {
     background: "red",
     color: "white",
     border: "none",
-    padding: "5px 8px",
+    padding: "6px 10px",
+    borderRadius: "4px",
     cursor: "pointer",
   },
 
@@ -217,5 +285,6 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "6px",
+    cursor: "pointer",
   },
 };
